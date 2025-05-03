@@ -1,0 +1,12 @@
+default:
+  vars:
+    workstation_user: kepler
+    git_name: Henrycke Bozza Schenberk
+    git_email: 0Kerryhen@pm.me
+    virtual_machine: true           # install and secure qemu-guest-agent    [true/false]
+    desktop_environment: true       # install desktop environment            [true/false]
+
+  hosts:
+    localhost:                      # self install
+    arch-dev-machine:
+

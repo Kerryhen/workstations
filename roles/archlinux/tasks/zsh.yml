@@ -1,0 +1,113 @@
+---
+- name: Download oh-my-zsh
+  block:
+    - name: Check if ~/.oh-my-zsh exists
+      ansible.builtin.stat:
+        path: '/home/{{ ansible_user_id}}/.oh-my-zsh'
+      register: oh_my_zsh
+
+    - name: Download Oh My Zsh installation script
+      get_url:
+        url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+        dest: /tmp/install_ohmyzsh.sh
+      when: not oh_my_zsh.stat.exists
+
+- name: Run Oh My Zsh installation script
+  command: sh /tmp/install_ohmyzsh.sh --unattended
+  register: ohmyzsh_result
+  when: not oh_my_zsh.stat.exists
+  failed_when: "'FAILED' in ohmyzsh_result.stderr"
+
+- name: Change default shell to zsh
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
+    shell: /bin/zsh
+  become: true
+  become_user: root
+
+- name: Download Powerlevel10k Zsh Theme
+  ansible.builtin.git:
+    repo: https://github.com/romkatv/powerlevel10k.git
+    dest: '/home/{{ ansible_user_id}}/.oh-my-zsh/custom/themes/powerlevel10k'
+    update: true
+    depth: 1
+
+- name: Configure Powerlevel10k as Zsh Theme
+  ansible.builtin.lineinfile:
+    path: /home/{{ ansible_user_id }}/.zshrc
+    state: present
+    regexp: '^ZSH_THEME'
+    line: 'ZSH_THEME="powerlevel10k/powerlevel10k"'
+
+- name: Configure Zsh to source .p10k.zsh 
+  ansible.builtin.lineinfile:
+    path: /home/{{ ansible_user_id }}/.zshrc
+    state: present
+    line: 'source ~/.p10k.zsh'
+
+- name: Customize Powerlevel10k
+  ansible.builtin.copy:
+    src: zsh_p10k
+    dest: '/home/{{ ansible_user_id}}/.p10k.zsh'
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: 0644
+
+- name: Disable Powerlevel10k configuration wizard
+  ansible.builtin.lineinfile:
+    path: /home/{{ ansible_user_id }}/.zshrc
+    state: present
+    regexp: '^POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD'
+    line: 'POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true'
+
+- name: Copy aliases to $ZSH_CUSTOM folder
+  ansible.builtin.template:
+    src: zsh_aliases.j2
+    dest: /home/{{ ansible_user_id }}/.oh-my-zsh/custom/aliases.zsh
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: 0644
+
+- name: Configure Zsh to source fzf completion 
+  ansible.builtin.lineinfile:
+    path: /home/{{ ansible_user_id }}/.zshrc
+    state: present
+    line: 'source <(fzf --zsh)'
+
+- name: Configure Zsh to source zoxide
+  ansible.builtin.lineinfile:
+    path: /home/{{ ansible_user_id }}/.zshrc
+    state: present
+    line: 'eval "$(zoxide init zsh)"'
+
+- name: Export EDITOR variable to zsh 
+  ansible.builtin.lineinfile:
+    path: /home/{{ ansible_user_id }}/.zshrc
+    state: present
+    regexp: '^export EDITOR'
+    line: 'export EDITOR=nvim'
+
+- name: Fix SSH agent forwarder and add tmux session management
+  ansible.builtin.blockinfile:
+    path: /home/{{ ansible_user_id }}/.zshrc
+    block: |
+      # SSH Agent forwarder fix and tmux session management
+      if [[ -n "$SSH_TTY" ]]; then
+          # If not inside tmux, create or update the SSH_AUTH_SOCK symlink
+          if [ -z "$TMUX" ]; then
+              ln -s -f $SSH_AUTH_SOCK /tmp/SSH_AUTH_SOCK
+          fi
+      
+          export SSH_AUTH_SOCK=/tmp/SSH_AUTH_SOCK
+      
+          # Start tmux if not already inside a tmux session
+          if [ -z "$TMUX" ]; then
+              if ! tmux has-session -t default 2>/dev/null; then
+                  tmux new-session -s default
+              else
+                  tmux attach-session -t default
+              fi
+          fi
+      fi
+    state: present
+

@@ -1,0 +1,79 @@
+---
+desktop_packages:
+  - bluez
+  - bluez-utils
+  - dmenu
+  - firefox
+  - flameshot
+  - gnome
+  - gnome-browser-connector
+  - gnome-tweaks
+  - hyprpaper
+  - peek
+  - timeshift
+  - ttf-font-awesome
+  - virtualbox
+  - waybar
+  - xorg
+
+hashicorp_packages:
+  - consul
+  - nomad
+  - terraform-docs
+  - tfenv
+  - vagrant
+  - vault
+
+pacman_packages:
+  - base-devel
+  - curl
+  - git
+
+yay_packages:
+  - ansible-core
+  # - balena-etcher
+  - bashtop
+  - bat
+  - bottom
+  - cifs-utils
+  - curlie
+  - dive
+  - docker
+  - dog
+  - duf
+  - dust
+  - exa
+  - fastfetch
+  - fd
+  - fuse-common
+  - fzf
+  - gnome-shell-extension-espresso-git
+  - glow
+  - htop
+  - httpie
+  - hyprland-git
+  - iftop
+  - ipcalc
+  - jq
+  - kitty
+  - lazygit
+  - less
+  - lsd
+  - minio-client
+  - neovim
+  - netcat
+  - npm
+  - onefetch
+  - ripgrep
+  - stow
+  - tmux
+  - toilet
+  - tree
+  - tree-sitter
+  - tree-sitter-cli
+  - ttf-sourcecodepro-nerd
+  - wget
+  - xh
+  - yazi
+  - zoxide
+  - zsh

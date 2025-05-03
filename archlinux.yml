@@ -1,0 +1,8 @@
+---
+- name: archlinux
+  hosts:
+    - default
+  become: true
+  become_user: "{{ workstation_user }}"
+  roles:
+    - archlinux
